@@ -15,24 +15,17 @@ namespace LibrariesEvents
             InitializeComponent();
         }
 
-        private async void button1_Click(object sender, EventArgs e)
-        {
-            Scrapper scrapper = new();
-            var currentEvents = await scrapper.GetCurrentEvents();
-            dataGridView1.DataSource = currentEvents;
-        }
 
-        private async void button2_Click(object sender, EventArgs e)
-        {
-            string fileName = "events.json";
-            using FileStream openStream = File.OpenRead(fileName);
-            var currentEvents = await JsonSerializer.DeserializeAsync<List<LibEvent>>(openStream);
-            dataGridView1.DataSource = currentEvents;
-        }
 
         private async void zapiszJakoObejrzaneToolStripMenuItem_Click(object sender, EventArgs e)
         {
             eventsFromFile.AddRange(newEvents);
+            await SaveToFile();
+            MessageBox.Show($"Wydarzenia zostały zapisane jako obejrzane.");
+        }
+
+        private async Task SaveToFile()
+        {
             string json = JsonSerializer.Serialize(eventsFromFile);
             await File.WriteAllTextAsync("events.json", json);
         }
@@ -42,31 +35,20 @@ namespace LibrariesEvents
             Close();
         }
 
-        private async void załadujZPlikuToolStripMenuItem_Click(object sender, EventArgs e)
+        private async void RemoveOldEvents()
         {
-            await LoadEventsFromFile();
-            dataGridView1.DataSource = eventsFromFile;
-        }
-
-        private async void wczytajWydarzeniaZeStronyToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            await LoadCurrentEvents();
-            MessageBox.Show($"Na stronie jest obecnie {currentEvents.Count} wydarzeń");
+            eventsFromFile = eventsFromFile.Where(a => a.Date >= DateTime.Today).ToList();
+            await SaveToFile();
         }
 
         private async void porównajZObejrzanymiToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (currentEvents == null || currentEvents.Count < 1)
-            {
-                await LoadCurrentEvents();
-            }
-
-            if (eventsFromFile == null || eventsFromFile.Count < 1)
-            {
-                await LoadEventsFromFile();
-            }
+            await LoadEventsFromFile();
+            RemoveOldEvents();
+            await LoadCurrentEvents();
 
             newEvents = currentEvents?.Where(a => !eventsFromFile.Select(a => a.Url).Contains(a.Url)).ToList();
+            newEvents.ForEach(a => a.Name = a.Name?.Replace("&quot;", "\""));
 
             if (newEvents != null && newEvents.Count < 1)
             {
@@ -91,7 +73,6 @@ namespace LibrariesEvents
             Scrapper scrapper = new();
             currentEvents = await scrapper.GetCurrentEvents();
             currentEvents = currentEvents.OrderBy(a => a.Name).ToList();
-            dataGridView1.DataSource = currentEvents;
         }
 
         private void dataGridView1_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
@@ -105,13 +86,13 @@ namespace LibrariesEvents
             dataGridView1.Columns["Date"].HeaderText = "Data";
             dataGridView1.Columns["Date"].Width = 102;
             dataGridView1.Columns["Name"].HeaderText = "Nazwa wydarzenia";
-            dataGridView1.Columns["Name"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            dataGridView1.Columns["Name"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
             dataGridView1.Columns["BranchNumber"].HeaderText = "nr";
             dataGridView1.Columns["BranchNumber"].Width = 33;
             dataGridView1.Columns["BranchName"].HeaderText = "Nazwa biblioteki";
             dataGridView1.Columns["BranchName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
             dataGridView1.Columns["Type"].HeaderText = "Typ";
-            dataGridView1.Columns["Type"].Width = 70;
+            dataGridView1.Columns["Type"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
