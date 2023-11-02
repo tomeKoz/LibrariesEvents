@@ -71,8 +71,12 @@ namespace LibrariesEvents
         private async Task LoadCurrentEvents()
         {
             Scrapper scrapper = new();
+            label1.Visible = true;
+            progressBar1.Visible = true;
             currentEvents = await scrapper.GetCurrentEvents();
             currentEvents = currentEvents.OrderBy(a => a.Name).ToList();
+            label1.Visible = false;
+            progressBar1.Visible = false;
         }
 
         private void dataGridView1_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
