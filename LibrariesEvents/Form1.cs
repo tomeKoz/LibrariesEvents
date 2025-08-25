@@ -63,6 +63,10 @@ namespace LibrariesEvents
 
         private async Task LoadEventsFromFile()
         {
+            if (!File.Exists(fileName))
+            {
+                File.WriteAllText(fileName, "[]");
+            }
             using FileStream openStream = File.OpenRead(fileName);
             eventsFromFile = await JsonSerializer.DeserializeAsync<List<LibEvent>>(openStream);
             eventsFromFile = eventsFromFile?.OrderBy(a => a?.Name)?.ToList();
