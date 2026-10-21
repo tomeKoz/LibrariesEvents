@@ -15,8 +15,6 @@ namespace LibrariesEvents
             InitializeComponent();
         }
 
-
-
         private async void zapiszJakoObejrzaneToolStripMenuItem_Click(object sender, EventArgs e)
         {
             eventsFromFile.AddRange(newEvents);
@@ -37,7 +35,8 @@ namespace LibrariesEvents
 
         private async void RemoveOldEvents()
         {
-            eventsFromFile = eventsFromFile.Where(a => a.Date >= DateTime.Today).ToList();
+            var firstOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            eventsFromFile = eventsFromFile.Where(a => a.Date >= firstOfMonth).ToList();
             await SaveToFile();
         }
 
@@ -48,7 +47,7 @@ namespace LibrariesEvents
             await LoadCurrentEvents();
 
             newEvents = currentEvents?.Where(a => !eventsFromFile.Select(a => a.Url).Contains(a.Url)).ToList();
-            newEvents.ForEach(a => a.Name = a.Name?.Replace("&quot;", "\""));
+            newEvents?.ForEach(a => a.Name = a.Name?.Replace("&quot;", "\""));
 
             if (newEvents != null && newEvents.Count < 1)
             {
@@ -95,12 +94,6 @@ namespace LibrariesEvents
             dataGridView1.Columns["Date"].Width = 102;
             dataGridView1.Columns["Name"].HeaderText = "Nazwa wydarzenia";
             dataGridView1.Columns["Name"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
-            dataGridView1.Columns["BranchNumber"].HeaderText = "nr";
-            dataGridView1.Columns["BranchNumber"].Width = 33;
-            dataGridView1.Columns["BranchName"].HeaderText = "Nazwa biblioteki";
-            dataGridView1.Columns["BranchName"].AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells;
-            dataGridView1.Columns["Type"].HeaderText = "Typ";
-            dataGridView1.Columns["Type"].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
         }
 
         private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
