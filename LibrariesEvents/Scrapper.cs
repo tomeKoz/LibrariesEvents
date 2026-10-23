@@ -44,6 +44,7 @@ namespace LibrariesEvents
 
             return results
                 .SelectMany(r => r)
+                .Where(e => e.Date >= today)
                 .GroupBy(e => (e.Url, e.Date))
                 .Select(g => g.First())
                 .ToList();

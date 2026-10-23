@@ -35,8 +35,7 @@ namespace LibrariesEvents
 
         private async void RemoveOldEvents()
         {
-            var firstOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-            eventsFromFile = eventsFromFile.Where(a => a.Date >= firstOfMonth).ToList();
+            eventsFromFile = eventsFromFile.Where(a => a.Date >= DateTime.Today).ToList();
             await SaveToFile();
         }
 
